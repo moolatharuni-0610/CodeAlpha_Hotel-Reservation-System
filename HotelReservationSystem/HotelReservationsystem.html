@@ -1,0 +1,924 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Heaven Palace Grand Hotel — Reservation System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#16242A;
+    --ink-soft:#4A5A5E;
+    --ivory:#F6F1E7;
+    --paper:#FFFFFF;
+    --line:#E4DACB;
+    --brass:#B8863F;
+    --brass-dark:#8F6A2C;
+    --sage:#7C8B6F;
+    --teal:#2E5256;
+    --clay:#B5604A;
+    --success:#4F7942;
+    --danger:#A8432F;
+    --radius:14px;
+    --shadow:0 10px 30px rgba(22,36,42,0.10);
+    --font-display:'Fraunces', serif;
+    --font-body:'Inter', sans-serif;
+    --font-mono:'IBM Plex Mono', monospace;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0; background:var(--ivory); color:var(--ink);
+    font-family:var(--font-body); line-height:1.5; -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3{font-family:var(--font-display); margin:0; font-weight:600;}
+  p{margin:0;}
+  a{color:inherit;}
+  :focus-visible{outline:2px solid var(--brass); outline-offset:2px;}
+  button{font-family:inherit; cursor:pointer;}
+  .wrap{max-width:1080px; margin:0 auto; padding:0 24px;}
+
+  /* ---------- Header ---------- */
+  .site-header{
+    position:sticky; top:0; z-index:40; background:var(--ink); color:var(--ivory);
+    border-bottom:1px solid rgba(246,241,231,0.08);
+  }
+  .site-header .wrap{display:flex; align-items:center; justify-content:space-between; padding:16px 24px;}
+  .brandmark .eyebrow{display:block; font-family:var(--font-mono); font-size:10.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--brass); margin-bottom:2px;}
+  .brandmark .name{font-size:20px; letter-spacing:.01em;}
+  nav.site-nav{display:flex; gap:22px; align-items:center;}
+  nav.site-nav a{font-size:14px; color:rgba(246,241,231,0.85); text-decoration:none; position:relative; padding:4px 0;}
+  nav.site-nav a:hover{color:var(--ivory);}
+  nav.site-nav a::after{content:'';position:absolute;left:0;bottom:-2px;height:1px;width:0;background:var(--brass);transition:width .25s ease;}
+  nav.site-nav a:hover::after{width:100%;}
+
+  /* ---------- Hero ---------- */
+  .hero{background:linear-gradient(165deg,#16242A 0%,#1E3338 65%,#244349 100%); color:var(--ivory); padding:64px 0 130px; position:relative;}
+  .hero-inner{max-width:680px;}
+  .eyebrow-pill{display:inline-flex; align-items:center; gap:8px; font-family:var(--font-mono); font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--brass); border:1px solid rgba(184,134,63,0.5); border-radius:999px; padding:6px 14px; margin-bottom:22px;}
+  .hero h1{font-size:clamp(32px,4.4vw,48px); line-height:1.12; letter-spacing:-.01em;}
+  .hero h1 em{font-style:italic; color:#E7C988;}
+  .hero p.sub{margin-top:16px; font-size:16px; color:rgba(246,241,231,0.78); max-width:520px;}
+  .fade-up{animation:fadeUp .7s ease both;}
+  .fade-up.d1{animation-delay:.08s;}
+  .fade-up.d2{animation-delay:.16s;}
+  @keyframes fadeUp{from{opacity:0; transform:translateY(14px);} to{opacity:1; transform:translateY(0);}}
+  @media (prefers-reduced-motion: reduce){ .fade-up{animation:none;} html{scroll-behavior:auto;} }
+
+  /* ---------- Search card ---------- */
+  .search-card{
+    background:var(--paper); border-radius:var(--radius); box-shadow:var(--shadow);
+    margin-top:-78px; padding:26px; position:relative; z-index:5;
+  }
+  .search-grid{display:grid; grid-template-columns:repeat(4,1fr) auto; gap:16px; align-items:end;}
+  .field label{display:block; font-size:11.5px; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-soft); margin-bottom:6px;}
+  .field input, .field select{
+    width:100%; padding:10px 12px; border:1px solid var(--line); border-radius:9px;
+    font-family:var(--font-body); font-size:14.5px; color:var(--ink); background:#FCFAF6;
+  }
+  .field input:focus, .field select:focus{border-color:var(--brass); background:var(--paper);}
+  .btn{border:none; border-radius:9px; padding:11px 20px; font-size:14.5px; font-weight:600; transition:transform .15s ease, background .2s ease;}
+  .btn:active{transform:translateY(1px);}
+  .btn-primary{background:var(--brass); color:#fff;}
+  .btn-primary:hover{background:var(--brass-dark);}
+  .btn-ghost{background:transparent; border:1px solid var(--line); color:var(--ink);}
+  .btn-ghost:hover{border-color:var(--brass); color:var(--brass-dark);}
+  .btn-danger{background:transparent; border:1px solid var(--danger); color:var(--danger);}
+  .btn-danger:hover{background:var(--danger); color:#fff;}
+  .btn-block{width:100%;}
+  .search-error{grid-column:1 / -1; color:var(--danger); font-size:13px; margin-top:2px; display:none;}
+  .meta-line{margin-top:14px; font-size:12.5px; color:var(--ink-soft); display:flex; gap:16px; flex-wrap:wrap;}
+  .meta-line strong{color:var(--ink); font-weight:600;}
+  .memory-banner{margin-top:12px; font-size:12.5px; background:#FBF1DD; color:#7A5A1E; border:1px solid #EBD9A6; border-radius:8px; padding:8px 12px; display:none;}
+
+  @media (max-width:880px){ .search-grid{grid-template-columns:1fr 1fr;} .search-grid .btn{grid-column:1/-1;} }
+
+  /* ---------- Sections ---------- */
+  .section{padding:64px 0;}
+  .section-head{display:flex; align-items:baseline; justify-content:space-between; margin-bottom:28px; flex-wrap:wrap; gap:8px;}
+  .section-head h2{font-size:26px;}
+  .section-head .hint{font-size:13.5px; color:var(--ink-soft);}
+
+  /* ---------- Room cards ---------- */
+  .rooms-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:20px;}
+  @media (max-width:860px){ .rooms-grid{grid-template-columns:1fr;} }
+  .room-card{background:var(--paper); border-radius:var(--radius); overflow:hidden; border:1px solid var(--line); display:flex; flex-direction:column; transition:transform .2s ease, box-shadow .2s ease;}
+  .room-card:hover{transform:translateY(-3px); box-shadow:var(--shadow);}
+  .room-card__bar{height:5px;}
+  .room-card__body{padding:22px; flex:1; display:flex; flex-direction:column;}
+  .room-card__top{display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:6px;}
+  .room-card h3{font-size:21px;}
+  .tag-dot{width:8px; height:8px; border-radius:50%; display:inline-block; margin-right:6px;}
+  .room-card .tagline{font-size:13.5px; color:var(--ink-soft); margin:6px 0 14px;}
+  .price{font-family:var(--font-display); font-size:26px; font-weight:600;}
+  .price small{font-family:var(--font-body); font-size:12.5px; color:var(--ink-soft); font-weight:500;}
+  .amenities{display:flex; flex-wrap:wrap; gap:6px; margin:6px 0 18px;}
+  .amenity-chip{display:inline-flex; align-items:center; gap:5px; font-size:11.5px; padding:5px 9px; border-radius:999px; border:1px solid var(--line); color:var(--ink-soft);}
+  .amenity-chip svg{flex:none;}
+  .room-card__footer{margin-top:auto; display:flex; align-items:center; justify-content:space-between; gap:10px; padding-top:14px; border-top:1px solid var(--line);}
+  .availability{font-size:12.5px; color:var(--ink-soft);}
+  .availability strong{color:var(--success); font-size:14px;}
+  .availability.none strong{color:var(--danger);}
+  .empty-state{grid-column:1/-1; text-align:center; padding:48px 20px; border:1px dashed var(--line); border-radius:var(--radius); color:var(--ink-soft);}
+  .empty-state strong{display:block; color:var(--ink); font-family:var(--font-display); font-size:18px; margin-bottom:6px;}
+
+  /* ---------- Bookings ---------- */
+  .bookings-list{display:flex; flex-direction:column; gap:10px;}
+  .booking-row{display:grid; grid-template-columns:1.1fr 1fr 1.2fr .9fr .8fr auto; gap:14px; align-items:center; background:var(--paper); border:1px solid var(--line); border-radius:11px; padding:14px 18px;}
+  @media (max-width:920px){ .booking-row{grid-template-columns:1fr 1fr; row-gap:8px;} }
+  .booking-row .ref{font-family:var(--font-mono); font-size:12.5px; color:var(--ink-soft);}
+  .booking-row .guest{font-weight:600;}
+  .booking-row .dates{font-size:13px; color:var(--ink-soft);}
+  .badge{display:inline-flex; align-items:center; gap:5px; font-size:11.5px; font-weight:600; letter-spacing:.03em; text-transform:uppercase; padding:4px 10px; border-radius:999px;}
+  .badge--confirmed{background:#E8F0E3; color:var(--success);}
+  .badge--cancelled{background:#F4E5E0; color:var(--danger);}
+  .row-actions{display:flex; gap:8px; justify-self:end;}
+  .row-actions .btn{padding:7px 12px; font-size:13px;}
+
+  /* ---------- Admin ---------- */
+  details.admin{background:var(--paper); border:1px solid var(--line); border-radius:var(--radius); padding:4px 22px;}
+  details.admin summary{cursor:pointer; list-style:none; padding:18px 0; font-family:var(--font-display); font-size:18px; display:flex; align-items:center; justify-content:space-between;}
+  details.admin summary::-webkit-details-marker{display:none;}
+  details.admin summary .chev{transition:transform .2s ease; color:var(--brass);}
+  details.admin[open] summary .chev{transform:rotate(180deg);}
+  .admin-table{width:100%; border-collapse:collapse; margin-bottom:18px;}
+  .admin-table th{text-align:left; font-size:11.5px; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-soft); padding:8px 6px; border-bottom:1px solid var(--line);}
+  .admin-table td{padding:10px 6px; border-bottom:1px solid var(--line); font-size:14px;}
+  .switch{position:relative; display:inline-block; width:38px; height:22px;}
+  .switch input{display:none;}
+  .switch__track{position:absolute; inset:0; background:#D8D0BF; border-radius:999px; transition:background .2s ease;}
+  .switch__track::before{content:''; position:absolute; width:16px; height:16px; left:3px; top:3px; background:#fff; border-radius:50%; transition:transform .2s ease;}
+  .switch input:checked + .switch__track{background:var(--success);}
+  .switch input:checked + .switch__track::before{transform:translateX(16px);}
+
+  /* ---------- Footer ---------- */
+  footer{background:var(--ink); color:rgba(246,241,231,0.7); padding:36px 0; font-size:13px;}
+  footer .wrap{display:flex; justify-content:space-between; flex-wrap:wrap; gap:14px; align-items:center;}
+  footer .credit{max-width:560px; line-height:1.6;}
+  footer a.reset-link{color:#E7C988; text-decoration:underline; cursor:pointer; background:none; border:none; font-size:13px; padding:0;}
+
+  /* ---------- Modals ---------- */
+  .modal-overlay{position:fixed; inset:0; background:rgba(22,36,42,0.55); display:none; align-items:center; justify-content:center; padding:20px; z-index:100;}
+  .modal-overlay.is-open{display:flex;}
+  .modal{background:var(--paper); border-radius:16px; max-width:460px; width:100%; max-height:90vh; overflow-y:auto; padding:26px; box-shadow:var(--shadow); animation:popIn .2s ease both;}
+  @keyframes popIn{from{opacity:0; transform:scale(.97);} to{opacity:1; transform:scale(1);}}
+  .modal__head{display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;}
+  .modal__head h3{font-size:20px;}
+  .modal__close{background:none; border:none; font-size:20px; color:var(--ink-soft); line-height:1;}
+  .modal__steps{display:flex; gap:6px; margin:14px 0 20px;}
+  .step-pill{flex:1; text-align:center; font-size:11px; letter-spacing:.04em; text-transform:uppercase; padding:7px 4px; border-radius:7px; background:#F1ECE0; color:var(--ink-soft);}
+  .step-pill.active{background:var(--ink); color:var(--ivory);}
+  .modal__body{display:none;}
+  .modal__body.active{display:block;}
+  .field-stack{display:flex; flex-direction:column; gap:14px; margin-bottom:18px;}
+  .field-stack textarea{width:100%; padding:10px 12px; border:1px solid var(--line); border-radius:9px; font-family:inherit; font-size:14px; resize:vertical; min-height:64px;}
+  .price-breakdown{background:#FAF7EF; border:1px solid var(--line); border-radius:10px; padding:14px 16px; margin-bottom:18px; font-size:14px;}
+  .price-breakdown .row{display:flex; justify-content:space-between; padding:4px 0;}
+  .price-breakdown .row.total{border-top:1px dashed var(--line); margin-top:6px; padding-top:10px; font-weight:700; font-size:15.5px;}
+  .form-error{color:var(--danger); font-size:13px; margin:-6px 0 14px; display:none;}
+  .modal-actions{display:flex; gap:10px; margin-top:6px;}
+  .test-hint{font-size:12px; color:var(--ink-soft); margin-top:12px; text-align:center;}
+
+  /* keycard (signature element) */
+  .keycard{
+    background:linear-gradient(135deg,#16242A,#23393F); color:var(--ivory);
+    border-radius:14px; padding:22px; position:relative; overflow:hidden;
+    border-right:2px dashed rgba(246,241,231,0.25);
+  }
+  .keycard::before{content:''; position:absolute; top:34px; left:0; right:0; height:10px; background:linear-gradient(90deg,var(--brass),#E7C988);}
+  .keycard__label{font-family:var(--font-mono); font-size:10.5px; letter-spacing:.14em; text-transform:uppercase; color:#E7C988; margin-top:24px;}
+  .keycard__room{font-family:var(--font-display); font-size:38px; margin:6px 0 2px;}
+  .keycard__cat{font-size:12.5px; color:rgba(246,241,231,0.7); text-transform:capitalize;}
+  .keycard__divider{height:1px; background:rgba(246,241,231,0.18); margin:16px 0;}
+  .keycard__grid{display:grid; grid-template-columns:1fr 1fr; gap:10px; font-size:12.5px;}
+  .keycard__grid .k-label{color:rgba(246,241,231,0.55); display:block; font-size:10.5px; letter-spacing:.05em; text-transform:uppercase; margin-bottom:2px;}
+  .keycard__ref{font-family:var(--font-mono); font-size:13px; margin-top:14px; color:#E7C988;}
+  .confirm-icon{width:46px; height:46px; border-radius:50%; background:#E8F0E3; color:var(--success); display:flex; align-items:center; justify-content:center; margin:0 auto 14px;}
+
+  /* inline cancel confirm */
+  .inline-confirm{background:#F4E5E0; border:1px solid #E5BBAE; border-radius:10px; padding:14px; margin-top:16px; font-size:14px;}
+  .inline-confirm p{margin-bottom:10px;}
+
+  /* toast */
+  .toast-container{position:fixed; bottom:20px; right:20px; display:flex; flex-direction:column; gap:8px; z-index:200;}
+  .toast{background:var(--ink); color:var(--ivory); padding:12px 16px; border-radius:9px; font-size:13.5px; box-shadow:var(--shadow); max-width:300px; animation:popIn .2s ease both; border-left:3px solid var(--brass);}
+  .toast.error{border-left-color:var(--danger);}
+  .toast.success{border-left-color:var(--success);}
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap">
+    <div class="brandmark">
+      <span class="eyebrow">Heaven Palace</span>
+      <span class="name">Heaven Palace Grand Hotel</span>
+    </div>
+    <nav class="site-nav">
+      <a href="#rooms">Rooms</a>
+      <a href="#bookings">My Bookings</a>
+      <a href="#admin">Manage Rooms</a>
+    </nav>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="wrap hero-inner">
+    <span class="eyebrow-pill fade-up">Hotel Reservation System</span>
+    <h1 class="fade-up d1">Find your room, <em>book it in minutes.</em></h1>
+    <p class="sub fade-up d2">Search by date and party size, reserve a Standard, Deluxe or Suite room, and pay through a simulated gateway — built end to end with object-oriented JavaScript and persistent storage.</p>
+  </div>
+  <div class="wrap">
+    <form class="search-card" id="searchForm" novalidate>
+      <div class="search-grid">
+        <div class="field">
+          <label for="inCheckIn">Check-in</label>
+          <input type="date" id="inCheckIn" required>
+        </div>
+        <div class="field">
+          <label for="inCheckOut">Check-out</label>
+          <input type="date" id="inCheckOut" required>
+        </div>
+        <div class="field">
+          <label for="inGuests">Guests</label>
+          <input type="number" id="inGuests" min="1" max="6" value="1" required>
+        </div>
+        <div class="field">
+          <label for="inCategory">Room type</label>
+          <select id="inCategory">
+            <option value="all">All categories</option>
+            <option value="standard">Standard</option>
+            <option value="deluxe">Deluxe</option>
+            <option value="suite">Suite</option>
+          </select>
+        </div>
+        <button type="submit" class="btn btn-primary">Search rooms</button>
+        <p class="search-error" id="searchError"></p>
+      </div>
+      <p class="meta-line" id="metaLine"></p>
+      <p class="memory-banner" id="memoryBanner">Running in demo mode — persistent storage isn't available here, so new bookings will reset if you refresh the page.</p>
+    </form>
+  </div>
+</section>
+
+<main class="wrap">
+  <section class="section" id="rooms">
+    <div class="section-head">
+      <h2>Available rooms</h2>
+      <span class="hint" id="resultsHint"></span>
+    </div>
+    <div class="rooms-grid" id="roomsGrid"></div>
+  </section>
+
+  <section class="section" id="bookings">
+    <div class="section-head">
+      <h2>My bookings</h2>
+      <span class="hint">Confirmations, dates and payment status for every reservation made on this device.</span>
+    </div>
+    <div class="bookings-list" id="bookingsList"></div>
+  </section>
+
+  <section class="section" id="admin">
+    <details class="admin">
+      <summary>Manage rooms (admin) <span class="chev">▾</span></summary>
+      <p class="hint" style="margin-bottom:14px;">Take a room out of service for maintenance, or bring it back online. Rooms under maintenance won't appear in search results.</p>
+      <table class="admin-table" id="adminTable"></table>
+    </details>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p class="credit">CodeAlpha Internship Project — Hotel Reservation System. Room search, booking, cancellation and a simulated payment gateway, modeled with OOP classes (Room, Guest, Reservation, HotelService, PaymentSimulator) and a persistent key-value store standing in for a database.</p>
+    <button class="reset-link" id="resetDataBtn" type="button">Reset demo data</button>
+  </div>
+</footer>
+
+<!-- Booking modal: details -> payment -> confirmation -->
+<div class="modal-overlay" id="bookingOverlay" data-modal="bookingOverlay">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="bookingTitle">
+    <div class="modal__head">
+      <h3 id="bookingTitle">Reserve your room</h3>
+      <button class="modal__close" data-close>&times;</button>
+    </div>
+    <div class="modal__steps">
+      <div class="step-pill" id="pillDetails">1 · Details</div>
+      <div class="step-pill" id="pillPayment">2 · Payment</div>
+      <div class="step-pill" id="pillDone">3 · Confirmed</div>
+    </div>
+
+    <!-- Step 1 -->
+    <div class="modal__body" id="stepDetails">
+      <div class="price-breakdown" id="bookingSummary"></div>
+      <form id="guestForm">
+        <div class="field-stack">
+          <div class="field"><label for="guestName">Full name</label><input type="text" id="guestName" required></div>
+          <div class="field"><label for="guestEmail">Email</label><input type="email" id="guestEmail" required></div>
+          <div class="field"><label for="guestPhone">Phone</label><input type="tel" id="guestPhone" required placeholder="+91 90000 00000"></div>
+          <div class="field"><label for="guestNotes">Special requests (optional)</label><textarea id="guestNotes" placeholder="e.g. late check-in, high floor"></textarea></div>
+        </div>
+        <p class="form-error" id="guestFormError"></p>
+        <div class="modal-actions">
+          <button type="submit" class="btn btn-primary btn-block">Continue to payment</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Step 2 -->
+    <div class="modal__body" id="stepPayment">
+      <div class="price-breakdown" id="paySummary"></div>
+      <form id="paymentForm">
+        <div class="field-stack">
+          <div class="field"><label for="cardName">Name on card</label><input type="text" id="cardName" required></div>
+          <div class="field"><label for="cardNumber">Card number</label><input type="text" id="cardNumber" inputmode="numeric" maxlength="19" placeholder="4242 4242 4242 4242" required></div>
+          <div style="display:flex; gap:14px;">
+            <div class="field" style="flex:1;"><label for="cardExpiry">Expiry (MM/YY)</label><input type="text" id="cardExpiry" maxlength="5" placeholder="08/27" required></div>
+            <div class="field" style="flex:1;"><label for="cardCvv">CVV</label><input type="text" id="cardCvv" inputmode="numeric" maxlength="4" placeholder="123" required></div>
+          </div>
+        </div>
+        <p class="form-error" id="paymentFormError"></p>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-ghost" id="backToDetails">Back</button>
+          <button type="submit" class="btn btn-primary btn-block" id="payButton">Pay now</button>
+        </div>
+        <p class="test-hint">Simulated gateway — any 16-digit card works. End it in 0000 to test a decline.</p>
+      </form>
+    </div>
+
+    <!-- Step 3 -->
+    <div class="modal__body" id="stepDone">
+      <div class="confirm-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <h3 style="text-align:center; margin-bottom:16px;">Booking confirmed</h3>
+      <div class="keycard" id="confirmKeycard"></div>
+      <div class="modal-actions" style="margin-top:18px;">
+        <button type="button" class="btn btn-primary btn-block" id="doneBtn">Done</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Details modal -->
+<div class="modal-overlay" id="detailsOverlay" data-modal="detailsOverlay">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="detailsTitle">
+    <div class="modal__head">
+      <h3 id="detailsTitle">Booking details</h3>
+      <button class="modal__close" data-close>&times;</button>
+    </div>
+    <div class="keycard" id="detailsKeycard"></div>
+    <div id="detailsCancelArea"></div>
+  </div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ============ Helpers ============ */
+  function toISODate(d){ const tz=d.getTimezoneOffset(); const local=new Date(d.getTime()-tz*60000); return local.toISOString().slice(0,10); }
+  function todayISO(){ return toISODate(new Date()); }
+  function addDays(iso, n){ const d=new Date(iso+'T00:00:00'); d.setDate(d.getDate()+n); return toISODate(d); }
+  function nightsBetween(a,b){ return Math.round((new Date(b+'T00:00:00') - new Date(a+'T00:00:00'))/86400000); }
+  function datesOverlap(aStart,aEnd,bStart,bEnd){ return aStart < bEnd && bStart < aEnd; }
+  function generateId(){ return 'r-' + Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+  function generateBookingRef(){ return 'CA-' + new Date().getFullYear() + '-' + Math.random().toString(36).slice(2,8).toUpperCase(); }
+  function formatMoney(n){ return new Intl.NumberFormat('en-IN',{style:'currency',currency:'INR',maximumFractionDigits:0}).format(n); }
+  function formatDate(iso){ return new Intl.DateTimeFormat('en-IN',{day:'numeric',month:'short',year:'numeric'}).format(new Date(iso+'T00:00:00')); }
+  function escapeHtml(s){ const div=document.createElement('div'); div.textContent = s==null ? '' : String(s); return div.innerHTML; }
+  function wait(ms){ return new Promise(res=>setTimeout(res,ms)); }
+  const checkSvg = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+  /* ============ Catalog ============ */
+  const CATEGORY_META = {
+    standard:{ name:'Standard', price:4500, capacity:2, color:'var(--sage)',
+      tagline:'Smart comfort for short stays.', amenities:['Free Wi-Fi','Work desk','Daily housekeeping'] },
+    deluxe:{ name:'Deluxe', price:7800, capacity:3, color:'var(--teal)',
+      tagline:'More room, better views.', amenities:['City view','Mini bar','Premium toiletries','Free Wi-Fi'] },
+    suite:{ name:'Suite', price:14500, capacity:4, color:'var(--clay)',
+      tagline:'A residence for longer stays.', amenities:['Separate living area','Jacuzzi','Butler service','Breakfast included'] }
+  };
+  const CATEGORY_ORDER = ['standard','deluxe','suite'];
+
+  /* ============ OOP model ============ */
+  class Room {
+    constructor(id, category, number, floor, inService){
+      this.id=id; this.category=category; this.number=number; this.floor=floor; this.inService = inService!==false;
+    }
+  }
+
+  class Guest {
+    constructor(name, email, phone, notes){
+      this.name=name; this.email=email; this.phone=phone; this.notes=notes||'';
+    }
+  }
+
+  class Reservation {
+    constructor(data){ Object.assign(this, data); }
+  }
+
+  class PaymentSimulator {
+    static async charge({ cardNumber, amount }){
+      await wait(1300);
+      const digits = cardNumber.replace(/\s+/g,'');
+      if (digits.slice(-4) === '0000') {
+        return { success:false, message:'The simulated gateway declined this card. Try a different number.' };
+      }
+      return { success:true, message:'Payment approved.', authCode:'AUTH-' + Math.random().toString(36).slice(2,8).toUpperCase() };
+    }
+  }
+
+  class HotelService {
+    constructor(rooms, reservations){ this.rooms = rooms; this.reservations = reservations; }
+
+    roomsByCategory(category){ return this.rooms.filter(r => r.category === category); }
+
+    isRoomFree(roomId, checkIn, checkOut, excludeId){
+      return !this.reservations.some(r =>
+        r.roomId === roomId && r.status === 'confirmed' && r.id !== excludeId &&
+        datesOverlap(checkIn, checkOut, r.checkIn, r.checkOut)
+      );
+    }
+
+    availableRooms(category, checkIn, checkOut){
+      return this.roomsByCategory(category).filter(r => r.inService && this.isRoomFree(r.id, checkIn, checkOut));
+    }
+
+    searchAvailability(checkIn, checkOut, guests, categoryFilter){
+      const cats = categoryFilter === 'all' ? CATEGORY_ORDER : [categoryFilter];
+      return cats
+        .filter(cat => !guests || CATEGORY_META[cat].capacity >= guests)
+        .map(cat => {
+          const free = this.availableRooms(cat, checkIn, checkOut);
+          return { category:cat, meta:CATEGORY_META[cat], availableCount:free.length };
+        });
+    }
+
+    reserve({ category, checkIn, checkOut, guest }){
+      const free = this.availableRooms(category, checkIn, checkOut);
+      if (free.length === 0) return { success:false, message:'No rooms left in this category for those dates.' };
+      const room = free[0];
+      const nights = nightsBetween(checkIn, checkOut);
+      const rate = CATEGORY_META[category].price;
+      const subtotal = rate * nights;
+      const tax = Math.round(subtotal * 0.12);
+      const total = subtotal + tax;
+      const reservation = new Reservation({
+        id:generateId(), roomId:room.id, roomNumber:room.number, category,
+        guest, checkIn, checkOut, nights, rate, subtotal, tax, total,
+        status:'confirmed', paymentStatus:'paid', bookingRef:generateBookingRef(),
+        createdAt:new Date().toISOString()
+      });
+      this.reservations.unshift(reservation);
+      return { success:true, reservation, room };
+    }
+
+    cancel(reservationId){
+      const r = this.reservations.find(x => x.id === reservationId);
+      if (!r) return { success:false, message:'Booking not found.' };
+      if (r.status === 'cancelled') return { success:false, message:'Already cancelled.' };
+      if (r.checkIn <= todayISO()) return { success:false, message:"This stay has already started and can't be cancelled." };
+      r.status = 'cancelled';
+      if (r.paymentStatus === 'paid') r.paymentStatus = 'refunded';
+      r.cancelledAt = new Date().toISOString();
+      return { success:true, reservation:r };
+    }
+
+    toggleService(roomId){
+      const room = this.rooms.find(r => r.id === roomId);
+      if (room) room.inService = !room.inService;
+      return room;
+    }
+  }
+
+  /* ============ Seed data ============ */
+  function buildRooms(){
+    const rooms = [];
+    [101,102,103,104,105,106].forEach(n => rooms.push(new Room('STD-'+n,'standard',String(n),1,true)));
+    [201,202,203,204,205].forEach(n => rooms.push(new Room('DLX-'+n,'deluxe',String(n),2,true)));
+    [301,302,303].forEach(n => rooms.push(new Room('STE-'+n,'suite',String(n),3,true)));
+    return rooms;
+  }
+
+  function seedData(){
+    const rooms = buildRooms();
+    const reservations = [
+      new Reservation({
+        id:generateId(), roomId:'STD-102', roomNumber:'102', category:'standard',
+        guest:new Guest('Aanya Kapoor','aanya.kapoor@example.com','+91 98765 43210',''),
+        checkIn:addDays(todayISO(),5), checkOut:addDays(todayISO(),8), nights:3,
+        rate:4500, subtotal:13500, tax:1620, total:15120,
+        status:'confirmed', paymentStatus:'paid', bookingRef:'CA-DEMO-0001',
+        createdAt:new Date(Date.now()-86400000).toISOString()
+      }),
+      new Reservation({
+        id:generateId(), roomId:'DLX-202', roomNumber:'202', category:'deluxe',
+        guest:new Guest('Rohan Mehta','rohan.mehta@example.com','+91 91234 56789',''),
+        checkIn:addDays(todayISO(),-10), checkOut:addDays(todayISO(),-7), nights:3,
+        rate:7800, subtotal:23400, tax:2808, total:26208,
+        status:'cancelled', paymentStatus:'refunded', bookingRef:'CA-DEMO-0002',
+        createdAt:new Date(Date.now()-12*86400000).toISOString(),
+        cancelledAt:new Date(Date.now()-9*86400000).toISOString()
+      })
+    ];
+    return { rooms, reservations };
+  }
+
+  /* ============ Persistence ============ */
+  const STORAGE_KEY = 'hotel-data';
+  let storageAvailable = true;
+
+  async function loadData(){
+    if (!window.storage) { storageAvailable = false; return seedData(); }
+    try {
+      const res = await window.storage.get(STORAGE_KEY, false);
+      return JSON.parse(res.value);
+    } catch (e) {
+      const seeded = seedData();
+      await persist(seeded);
+      return seeded;
+    }
+  }
+
+  async function persist(data){
+    if (!window.storage) return;
+    try {
+      await window.storage.set(STORAGE_KEY, JSON.stringify(data), false);
+    } catch (e) {
+      console.error('Storage error', e);
+      showToast('Changes could not be saved to storage.', 'error');
+    }
+  }
+
+  async function saveHotel(){ await persist({ rooms:hotel.rooms, reservations:hotel.reservations }); }
+
+  /* ============ App state ============ */
+  let hotel = null;
+  let currentSearch = { checkIn:todayISO(), checkOut:addDays(todayISO(),1), guests:1, category:'all' };
+  let pendingBooking = null; // { category, checkIn, checkOut, guest, nights, subtotal, tax, total }
+
+  /* ============ Toast ============ */
+  function showToast(msg, type){
+    const container = document.getElementById('toastContainer');
+    const el = document.createElement('div');
+    el.className = 'toast' + (type ? ' ' + type : '');
+    el.textContent = msg;
+    container.appendChild(el);
+    setTimeout(() => el.remove(), 4200);
+  }
+
+  /* ============ Modal helpers ============ */
+  function openModal(id){ document.getElementById(id).classList.add('is-open'); }
+  function closeModal(id){ document.getElementById(id).classList.remove('is-open'); }
+  document.querySelectorAll('[data-close]').forEach(btn => {
+    btn.addEventListener('click', () => btn.closest('.modal-overlay').classList.remove('is-open'));
+  });
+  document.querySelectorAll('.modal-overlay').forEach(ov => {
+    ov.addEventListener('click', e => { if (e.target === ov) ov.classList.remove('is-open'); });
+  });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') document.querySelectorAll('.modal-overlay.is-open').forEach(ov => ov.classList.remove('is-open'));
+  });
+
+  function goToStep(step){
+    ['stepDetails','stepPayment','stepDone'].forEach(s => document.getElementById(s).classList.remove('active'));
+    ['pillDetails','pillPayment','pillDone'].forEach(s => document.getElementById(s).classList.remove('active'));
+    if (step === 1){ document.getElementById('stepDetails').classList.add('active'); document.getElementById('pillDetails').classList.add('active'); }
+    if (step === 2){ document.getElementById('stepPayment').classList.add('active'); document.getElementById('pillPayment').classList.add('active'); }
+    if (step === 3){ document.getElementById('stepDone').classList.add('active'); document.getElementById('pillDone').classList.add('active'); }
+  }
+
+  /* ============ Rendering ============ */
+  function renderMeta(){
+    const total = hotel.rooms.length;
+    const inService = hotel.rooms.filter(r => r.inService).length;
+    document.getElementById('metaLine').innerHTML =
+      '<span><strong>' + total + '</strong> rooms across 3 categories</span>' +
+      '<span><strong>' + inService + '</strong> currently in service</span>';
+    document.getElementById('memoryBanner').style.display = storageAvailable ? 'none' : 'block';
+  }
+
+  function renderRooms(){
+    const grid = document.getElementById('roomsGrid');
+    const { checkIn, checkOut, guests, category } = currentSearch;
+    const results = hotel.searchAvailability(checkIn, checkOut, guests, category);
+    const nights = nightsBetween(checkIn, checkOut);
+    document.getElementById('resultsHint').textContent =
+      formatDate(checkIn) + ' – ' + formatDate(checkOut) + ' · ' + nights + ' night' + (nights===1?'':'s') + ' · ' + guests + ' guest' + (guests===1?'':'s');
+
+    if (results.length === 0) {
+      grid.innerHTML = '<div class="empty-state"><strong>No rooms match these dates</strong>No category sleeps that many guests, or every room of that type is booked. Try lowering the guest count or removing the room type filter.</div>';
+      return;
+    }
+
+    grid.innerHTML = results.map(r => {
+      const m = r.meta;
+      const total = m.price * nights;
+      const amenities = m.amenities.map(a => '<span class="amenity-chip">' + checkSvg + escapeHtml(a) + '</span>').join('');
+      const availClass = r.availableCount === 0 ? ' none' : '';
+      const availText = r.availableCount === 0
+        ? '<strong>Fully booked</strong> for these dates'
+        : '<strong>' + r.availableCount + '</strong> room' + (r.availableCount===1?'':'s') + ' available';
+      const disabled = r.availableCount === 0 ? 'disabled' : '';
+      return (
+        '<div class="room-card">' +
+          '<div class="room-card__bar" style="background:' + m.color + '"></div>' +
+          '<div class="room-card__body">' +
+            '<div class="room-card__top">' +
+              '<h3><span class="tag-dot" style="background:' + m.color + '"></span>' + m.name + '</h3>' +
+            '</div>' +
+            '<p class="tagline">' + m.tagline + '</p>' +
+            '<div class="price">' + formatMoney(m.price) + ' <small>/ night · sleeps ' + m.capacity + '</small></div>' +
+            '<div class="amenities">' + amenities + '</div>' +
+            '<div class="room-card__footer">' +
+              '<span class="availability' + availClass + '">' + availText + '</span>' +
+              '<button class="btn btn-primary" data-reserve="' + r.category + '" ' + disabled + '>Reserve · ' + formatMoney(total) + '</button>' +
+            '</div>' +
+          '</div>' +
+        '</div>'
+      );
+    }).join('');
+
+    grid.querySelectorAll('[data-reserve]').forEach(btn => {
+      btn.addEventListener('click', () => openBookingFlow(btn.getAttribute('data-reserve')));
+    });
+  }
+
+  function renderBookings(){
+    const list = document.getElementById('bookingsList');
+    if (hotel.reservations.length === 0) {
+      list.innerHTML = '<div class="empty-state"><strong>No bookings yet</strong>Reserve a room above and it will show up here with its confirmation details.</div>';
+      return;
+    }
+    list.innerHTML = hotel.reservations.map(r => {
+      const badge = r.status === 'confirmed'
+        ? '<span class="badge badge--confirmed">' + checkSvg + ' Confirmed</span>'
+        : '<span class="badge badge--cancelled">Cancelled</span>';
+      return (
+        '<div class="booking-row">' +
+          '<div><div class="guest">' + escapeHtml(r.guest.name) + '</div><div class="ref">' + r.bookingRef + '</div></div>' +
+          '<div>' + CATEGORY_META[r.category].name + ' · Room ' + r.roomNumber + '</div>' +
+          '<div class="dates">' + formatDate(r.checkIn) + ' – ' + formatDate(r.checkOut) + ' (' + r.nights + 'n)</div>' +
+          '<div>' + formatMoney(r.total) + '</div>' +
+          '<div>' + badge + '</div>' +
+          '<div class="row-actions"><button class="btn btn-ghost" data-details="' + r.id + '">Details</button></div>' +
+        '</div>'
+      );
+    }).join('');
+
+    list.querySelectorAll('[data-details]').forEach(btn => {
+      btn.addEventListener('click', () => openDetails(btn.getAttribute('data-details')));
+    });
+  }
+
+  function renderAdmin(){
+    const table = document.getElementById('adminTable');
+    const rows = hotel.rooms.map(r => {
+      const m = CATEGORY_META[r.category];
+      return (
+        '<tr>' +
+          '<td><span class="tag-dot" style="background:' + m.color + '"></span>' + m.name + '</td>' +
+          '<td>Room ' + r.number + '</td>' +
+          '<td>Sleeps ' + m.capacity + '</td>' +
+          '<td>' + formatMoney(m.price) + ' / night</td>' +
+          '<td>' + (r.inService ? 'In service' : 'Maintenance') + '</td>' +
+          '<td><label class="switch"><input type="checkbox" data-toggle="' + r.id + '" ' + (r.inService?'checked':'') + '><span class="switch__track"></span></label></td>' +
+        '</tr>'
+      );
+    }).join('');
+    table.innerHTML =
+      '<tr><th>Category</th><th>Room</th><th>Capacity</th><th>Rate</th><th>Status</th><th>In service</th></tr>' + rows;
+
+    table.querySelectorAll('[data-toggle]').forEach(input => {
+      input.addEventListener('change', async () => {
+        hotel.toggleService(input.getAttribute('data-toggle'));
+        await saveHotel();
+        renderRooms(); renderAdmin(); renderMeta();
+        showToast('Room status updated.', 'success');
+      });
+    });
+  }
+
+  function renderAll(){ renderMeta(); renderRooms(); renderBookings(); renderAdmin(); }
+
+  function keycardHtml(r){
+    const m = CATEGORY_META[r.category];
+    return (
+      '<div class="keycard__label">Guest key · ' + r.bookingRef + '</div>' +
+      '<div class="keycard__room">Room ' + r.roomNumber + '</div>' +
+      '<div class="keycard__cat">' + m.name + ' · ' + escapeHtml(r.guest.name) + '</div>' +
+      '<div class="keycard__divider"></div>' +
+      '<div class="keycard__grid">' +
+        '<div><span class="k-label">Check-in</span>' + formatDate(r.checkIn) + '</div>' +
+        '<div><span class="k-label">Check-out</span>' + formatDate(r.checkOut) + '</div>' +
+        '<div><span class="k-label">Nights</span>' + r.nights + '</div>' +
+        '<div><span class="k-label">Total paid</span>' + formatMoney(r.total) + '</div>' +
+      '</div>' +
+      '<div class="keycard__ref">Payment: ' + r.paymentStatus.toUpperCase() + (r.status==='cancelled' ? ' · BOOKING CANCELLED' : '') + '</div>'
+    );
+  }
+
+  /* ============ Search form ============ */
+  const inCheckIn = document.getElementById('inCheckIn');
+  const inCheckOut = document.getElementById('inCheckOut');
+  const inGuests = document.getElementById('inGuests');
+  const inCategory = document.getElementById('inCategory');
+
+  inCheckIn.min = todayISO();
+  inCheckIn.value = currentSearch.checkIn;
+  inCheckOut.min = addDays(currentSearch.checkIn,1);
+  inCheckOut.value = currentSearch.checkOut;
+  inGuests.value = currentSearch.guests;
+
+  inCheckIn.addEventListener('change', () => {
+    const minOut = addDays(inCheckIn.value,1);
+    inCheckOut.min = minOut;
+    if (inCheckOut.value <= inCheckIn.value) inCheckOut.value = minOut;
+  });
+
+  document.getElementById('searchForm').addEventListener('submit', e => {
+    e.preventDefault();
+    const errorEl = document.getElementById('searchError');
+    const checkIn = inCheckIn.value, checkOut = inCheckOut.value, guests = parseInt(inGuests.value,10) || 1;
+    if (!checkIn || !checkOut) { errorEl.textContent = 'Pick both a check-in and check-out date.'; errorEl.style.display='block'; return; }
+    if (checkOut <= checkIn) { errorEl.textContent = 'Check-out must be after check-in.'; errorEl.style.display='block'; return; }
+    if (checkIn < todayISO()) { errorEl.textContent = 'Check-in can\'t be in the past.'; errorEl.style.display='block'; return; }
+    errorEl.style.display = 'none';
+    currentSearch = { checkIn, checkOut, guests, category: inCategory.value };
+    renderRooms();
+    document.getElementById('rooms').scrollIntoView({ behavior:'smooth', block:'start' });
+  });
+
+  /* ============ Booking flow ============ */
+  function openBookingFlow(category){
+    pendingBooking = { category, checkIn:currentSearch.checkIn, checkOut:currentSearch.checkOut, guests:currentSearch.guests };
+    const m = CATEGORY_META[category];
+    const nights = nightsBetween(pendingBooking.checkIn, pendingBooking.checkOut);
+    const subtotal = m.price * nights;
+    const tax = Math.round(subtotal * 0.12);
+    const total = subtotal + tax;
+    Object.assign(pendingBooking, { nights, subtotal, tax, total });
+
+    const summaryHtml =
+      '<div class="row"><span>' + m.name + ' room</span><span>' + formatMoney(m.price) + ' / night</span></div>' +
+      '<div class="row"><span>' + formatDate(pendingBooking.checkIn) + ' – ' + formatDate(pendingBooking.checkOut) + '</span><span>' + nights + ' night' + (nights===1?'':'s') + '</span></div>' +
+      '<div class="row"><span>Taxes & fees (12%)</span><span>' + formatMoney(tax) + '</span></div>' +
+      '<div class="row total"><span>Total</span><span>' + formatMoney(total) + '</span></div>';
+    document.getElementById('bookingSummary').innerHTML = summaryHtml;
+    document.getElementById('paySummary').innerHTML = summaryHtml;
+
+    document.getElementById('guestForm').reset();
+    document.getElementById('paymentForm').reset();
+    document.getElementById('guestFormError').style.display = 'none';
+    document.getElementById('paymentFormError').style.display = 'none';
+    document.getElementById('payButton').textContent = 'Pay now';
+    document.getElementById('payButton').disabled = false;
+    goToStep(1);
+    openModal('bookingOverlay');
+    document.getElementById('guestName').focus();
+  }
+
+  document.getElementById('guestForm').addEventListener('submit', e => {
+    e.preventDefault();
+    const name = document.getElementById('guestName').value.trim();
+    const email = document.getElementById('guestEmail').value.trim();
+    const phone = document.getElementById('guestPhone').value.trim();
+    const notes = document.getElementById('guestNotes').value.trim();
+    const errorEl = document.getElementById('guestFormError');
+    const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    if (!name || !email || !phone) { errorEl.textContent = 'Please fill in name, email and phone.'; errorEl.style.display='block'; return; }
+    if (!emailOk) { errorEl.textContent = 'That email address doesn\'t look right.'; errorEl.style.display='block'; return; }
+    if (phone.replace(/\D/g,'').length < 7) { errorEl.textContent = 'Please enter a valid phone number.'; errorEl.style.display='block'; return; }
+    errorEl.style.display = 'none';
+    pendingBooking.guest = new Guest(name, email, phone, notes);
+    goToStep(2);
+    document.getElementById('cardName').focus();
+  });
+
+  document.getElementById('backToDetails').addEventListener('click', () => goToStep(1));
+
+  document.getElementById('cardNumber').addEventListener('input', e => {
+    let digits = e.target.value.replace(/\D/g,'').slice(0,16);
+    e.target.value = digits.replace(/(.{4})/g,'$1 ').trim();
+  });
+  document.getElementById('cardExpiry').addEventListener('input', e => {
+    let digits = e.target.value.replace(/\D/g,'').slice(0,4);
+    e.target.value = digits.length > 2 ? digits.slice(0,2) + '/' + digits.slice(2) : digits;
+  });
+
+  document.getElementById('paymentForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    const errorEl = document.getElementById('paymentFormError');
+    const cardName = document.getElementById('cardName').value.trim();
+    const cardNumber = document.getElementById('cardNumber').value.trim();
+    const expiry = document.getElementById('cardExpiry').value.trim();
+    const cvv = document.getElementById('cardCvv').value.trim();
+    const digits = cardNumber.replace(/\s+/g,'');
+
+    if (!cardName || digits.length < 13 || digits.length > 16) { errorEl.textContent = 'Enter the name on the card and a valid card number.'; errorEl.style.display='block'; return; }
+    const expMatch = /^(0[1-9]|1[0-2])\/(\d{2})$/.exec(expiry);
+    if (!expMatch) { errorEl.textContent = 'Expiry should be in MM/YY format.'; errorEl.style.display='block'; return; }
+    const now = new Date();
+    const expYear = 2000 + parseInt(expMatch[2],10), expMonth = parseInt(expMatch[1],10);
+    if (expYear < now.getFullYear() || (expYear === now.getFullYear() && expMonth < now.getMonth()+1)) {
+      errorEl.textContent = 'This card has expired.'; errorEl.style.display='block'; return;
+    }
+    if (cvv.length < 3) { errorEl.textContent = 'Enter a valid CVV.'; errorEl.style.display='block'; return; }
+    errorEl.style.display = 'none';
+
+    const payBtn = document.getElementById('payButton');
+    payBtn.disabled = true; payBtn.textContent = 'Processing payment…';
+
+    const result = await PaymentSimulator.charge({ cardNumber, amount: pendingBooking.total });
+
+    if (!result.success) {
+      payBtn.disabled = false; payBtn.textContent = 'Pay now';
+      errorEl.textContent = result.message;
+      errorEl.style.display = 'block';
+      return;
+    }
+
+    const outcome = hotel.reserve({
+      category: pendingBooking.category,
+      checkIn: pendingBooking.checkIn,
+      checkOut: pendingBooking.checkOut,
+      guest: pendingBooking.guest
+    });
+
+    if (!outcome.success) {
+      payBtn.disabled = false; payBtn.textContent = 'Pay now';
+      errorEl.textContent = outcome.message + ' Your card has not been charged.';
+      errorEl.style.display = 'block';
+      return;
+    }
+
+    await saveHotel();
+    document.getElementById('confirmKeycard').innerHTML = keycardHtml(outcome.reservation);
+    goToStep(3);
+    renderRooms(); renderBookings(); renderMeta();
+    showToast('Booking ' + outcome.reservation.bookingRef + ' confirmed.', 'success');
+  });
+
+  document.getElementById('doneBtn').addEventListener('click', () => closeModal('bookingOverlay'));
+
+  /* ============ Details / cancel ============ */
+  function openDetails(reservationId){
+    const r = hotel.reservations.find(x => x.id === reservationId);
+    if (!r) return;
+    document.getElementById('detailsKeycard').innerHTML = keycardHtml(r);
+
+    const area = document.getElementById('detailsCancelArea');
+    const canCancel = r.status === 'confirmed' && r.checkIn > todayISO();
+    if (r.status === 'cancelled') {
+      area.innerHTML = '<p class="hint" style="margin-top:16px;">This booking was cancelled' + (r.cancelledAt ? ' on ' + formatDate(r.cancelledAt.slice(0,10)) : '') + '. ' + (r.paymentStatus==='refunded' ? 'The payment was refunded.' : '') + '</p>';
+    } else if (!canCancel) {
+      area.innerHTML = '<p class="hint" style="margin-top:16px;">This stay has already started, so it can no longer be cancelled online.</p>';
+    } else {
+      area.innerHTML =
+        '<div class="modal-actions" style="margin-top:18px;"><button class="btn btn-danger btn-block" id="cancelTrigger">Cancel this booking</button></div>';
+      document.getElementById('cancelTrigger').addEventListener('click', () => {
+        area.innerHTML =
+          '<div class="inline-confirm"><p><strong>Cancel booking ' + r.bookingRef + '?</strong> The ' + formatMoney(r.total) + ' payment will be marked as refunded. This can\'t be undone.</p>' +
+          '<div class="modal-actions"><button class="btn btn-ghost" id="cancelNo">Keep booking</button><button class="btn btn-danger" id="cancelYes">Yes, cancel</button></div></div>';
+        document.getElementById('cancelNo').addEventListener('click', () => openDetails(reservationId));
+        document.getElementById('cancelYes').addEventListener('click', async () => {
+          const res = hotel.cancel(reservationId);
+          if (res.success) {
+            await saveHotel();
+            renderRooms(); renderBookings(); renderMeta();
+            showToast('Booking ' + r.bookingRef + ' cancelled and refunded.', 'success');
+            closeModal('detailsOverlay');
+          } else {
+            showToast(res.message, 'error');
+          }
+        });
+      });
+    }
+    openModal('detailsOverlay');
+  }
+
+  /* ============ Reset demo data ============ */
+  document.getElementById('resetDataBtn').addEventListener('click', async () => {
+    if (!window.confirm('Reset all rooms and bookings back to the original demo data? This cannot be undone.')) return;
+    const seeded = seedData();
+    hotel = new HotelService(seeded.rooms, seeded.reservations);
+    await saveHotel();
+    renderAll();
+    showToast('Demo data has been reset.', 'success');
+  });
+
+  /* ============ Init ============ */
+  (async function init(){
+    const data = await loadData();
+    hotel = new HotelService(data.rooms, data.reservations);
+    renderAll();
+  })();
+
+})();
+</script>
+</body>
+</html>
